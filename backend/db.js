@@ -2,7 +2,9 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
 // Path for SQLite file
-const dbFile = path.join(__dirname, 'data.db');
+const dbFile = process.env.NODE_ENV === "production"
+  ? "/mnt/data/data.db"      // Render
+  : path.join(__dirname, "data.db");  // Local dev
 
 // Create DB instance
 const db = new sqlite3.Database(dbFile);
