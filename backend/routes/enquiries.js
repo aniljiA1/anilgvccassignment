@@ -7,10 +7,10 @@ const { body, validationResult } = require('express-validator');
 router.post(
   '/',
   [
-    body('product_id').isInt().withMessage('product_id required'),
-    body('name').trim().notEmpty().withMessage('name required'),
-    body('email').isEmail().withMessage('valid email required'),
-    body('message').trim().notEmpty().withMessage('message required'),
+    body('product_id').isInt(),
+    body('name').trim().notEmpty(),
+    body('email').isEmail(),
+    body('message').trim().notEmpty(),
     body('phone').optional().isString()
   ],
   async (req, res) => {
@@ -25,6 +25,7 @@ router.post(
          VALUES (?, ?, ?, ?, ?, datetime('now'))`,
         [product_id, name, email, phone, message]
       );
+
       res.status(201).json({ id: info.lastID });
     } catch (err) {
       console.error(err);
@@ -33,9 +34,10 @@ router.post(
   }
 );
 
-// GET /api/enquiries (admin)
+// GET /api/enquiries
 router.get('/', async (req, res) => {
   const token = req.header('x-admin-token') || '';
+
   if (process.env.ADMIN_TOKEN && token !== process.env.ADMIN_TOKEN) {
     return res.status(401).json({ error: 'Unauthorized' });
   }

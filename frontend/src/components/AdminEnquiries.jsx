@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 
 export default function AdminEnquiries() {
-  const [token, setToken] = useState('mysecret123') // default token, replace as needed
+  const [token, setToken] = useState(import.meta.env.VITE_ADMIN_TOKEN || "") // default token, replace as needed
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
 
   async function load() {
     if (!token) {
@@ -16,8 +17,8 @@ export default function AdminEnquiries() {
     setError(null)
 
     try {
-      const res = await fetch('http://localhost:5000/api/enquiries', {
-        headers: { 'x-admin-token': 'ysecret123' }
+      const res = await fetch(`${API_BASE}/api/enquiries`, {
+        headers: { 'x-admin-token': token }
       })
 
       if (!res.ok) {
