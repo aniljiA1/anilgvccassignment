@@ -1,13 +1,32 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
 
-// Path for SQLite file
+// --------------------
+// SQLite file path
+// --------------------
 const dbFile = process.env.NODE_ENV === "production"
-  ? "/mnt/data/data.db"      // Render
+  ? "/mnt/data/data.db"      // Render persistent disk
   : path.join(__dirname, "data.db");  // Local dev
 
+// Ensure folder exists (for Render)
+if (process.env.NODE_ENV === "production") {
+  const dir = path.dirname(dbFile);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
+// --------------------
 // Create DB instance
-const db = new sqlite3.Database(dbFile);
+// --------------------
+const db = new sqlite3.Database(dbFile, (err) => {
+  if (err) {
+    console.error('❌ SQLite connection error:', err.message);
+  } else {
+    console.log('✅ SQLite connected at:', dbFile);
+  }
+});
 
 // --- Helpers ---
 function run(sql, params = []) {
@@ -61,7 +80,7 @@ async function initTables() {
       FOREIGN KEY (product_id) REFERENCES products(id)
     )`);
 
-   // console.log('✅ Tables created!');
+    console.log('✅ Tables created!');
   } catch (err) {
     console.error('Failed to create tables:', err);
   }
@@ -70,7 +89,6 @@ async function initTables() {
 // --- Seed sample enquiries ---
 async function seedEnquiries() {
   try {
-    // Make sure table exists first
     await initTables();
 
     const row = await get('SELECT COUNT(*) as count FROM enquiries');
