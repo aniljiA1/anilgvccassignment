@@ -15,7 +15,7 @@ app.use(cors({
   origin: [
     "http://localhost:3000",   // If React dev server
     "http://localhost:5000",   // For testing
-    //"https://anilgvccbackend-1.onrender.com" // Render backend
+    'https://anilgvccassignment.vercel.app' // Render backend
     //"https://<your-frontend-domain>" // Add if frontend deployed on Render/Vercel
   ],
   credentials: true
