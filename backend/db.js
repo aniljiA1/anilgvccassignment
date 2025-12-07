@@ -5,15 +5,21 @@ const fs = require('fs');
 // --------------------
 // SQLite file path
 // --------------------
-const dbFile = process.env.NODE_ENV === "production"
-  ? "/mnt/data/data.db"      // Render persistent disk
-  : path.join(__dirname, "data.db");  // Local dev
+const isProd = process.env.NODE_ENV === "production";
+const dbDir = isProd ? "/mnt/data" : __dirname;
+const dbFile = path.join(dbDir, "data.db");
 
-// Ensure folder exists (for Render)
-if (process.env.NODE_ENV === "production") {
-  const dir = path.dirname(dbFile);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+// Ensure folder exists (only in production if disk added)
+if (isProd) {
+  try {
+    if (!fs.existsSync(dbDir)) {
+      console.error(`❌ Render Persistent Disk missing at ${dbDir}`);
+      console.error("Please add a Persistent Disk in Render Dashboard for your service!");
+      process.exit(1); // Stop app if disk not present
+    }
+  } catch (err) {
+    console.error("❌ Error checking/creating folder:", err);
+    process.exit(1);
   }
 }
 
@@ -21,11 +27,8 @@ if (process.env.NODE_ENV === "production") {
 // Create DB instance
 // --------------------
 const db = new sqlite3.Database(dbFile, (err) => {
-  if (err) {
-    console.error('❌ SQLite connection error:', err.message);
-  } else {
-    console.log('✅ SQLite connected at:', dbFile);
-  }
+  if (err) console.error('❌ SQLite connection error:', err.message);
+  else console.log('✅ SQLite connected at:', dbFile);
 });
 
 // --- Helpers ---
@@ -116,13 +119,7 @@ async function seedEnquiries() {
   }
 }
 
-// Initialize tables and seed
+// Initialize
 initTables().then(seedEnquiries);
 
-// Export
-module.exports = {
-  run,
-  get,
-  all,
-  db
-};
+module.exports = { run, get, all, db };
